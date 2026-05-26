@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encuesta | Ingeniería Ambiental UNICAH</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1a6b3c;
+    --verde-claro: #2d9e5f;
+    --verde-neon: #4dff91;
+    --bg: #0a120d;
+    --bg2: #111a13;
+    --card: #162019;
+    --borde: #1e3324;
+    --texto: #e8f5ec;
+    --muted: #7aaa8a;
+    --selected: #1a6b3c;
+    --selected-border: #4dff91;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--texto);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Fondo con textura */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(26,107,60,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(45,158,95,0.12) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* Header */
+  .header {
+    padding: 40px 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--borde);
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--verde), var(--verde-claro));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .header-text h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--texto);
+    letter-spacing: -0.3px;
+  }
+
+  .header-text p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Barra de progreso */
+  .progress-wrap {
+    margin-bottom: 36px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .area-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--verde-neon);
+  }
+
+  .progress-count {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--borde);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde), var(--verde-neon));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  /* Página */
+  .page { display: none; animation: fadeIn 0.4s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Área header */
+  .area-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-left: 3px solid var(--verde-neon);
+    border-radius: 12px;
+  }
+
+  .area-icon { font-size: 22px; }
+
+  .area-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--texto);
+  }
+
+  .area-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Pregunta */
+  .pregunta {
+    margin-bottom: 32px;
+  }
+
+  .pregunta-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--verde-claro);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .pregunta-texto {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--texto);
+    margin-bottom: 16px;
+  }
+
+  /* Opciones */
+  .opciones { display: flex; flex-direction: column; gap: 10px; }
+
+  .opcion {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1.5px solid var(--borde);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .opcion:hover {
+    border-color: var(--verde-claro);
+    background: rgba(45,158,95,0.08);
+    transform: translateX(4px);
+  }
+
+  .opcion.selected {
+    border-color: var(--selected-border);
+    background: rgba(77,255,145,0.07);
+  }
+
+  .opcion-letra {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--borde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .opcion.selected .opcion-letra {
+    background: var(--verde);
+    color: var(--verde-neon);
+  }
+
+  .opcion-texto {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--texto);
+  }
+
+  /* Botones nav */
+  .nav-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--borde);
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-back {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--borde);
+  }
+
+  .btn-back:hover { border-color: var(--muted); color: var(--texto); }
+
+  .btn-next {
+    background: linear-gradient(135deg, var(--verde), var(--verde-claro));
+    color: #fff;
+    flex: 1;
+    max-width: 220px;
+  }
+
+  .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #1a6b3c, #4dff91);
+    color: #0a120d;
+    flex: 1;
+    max-width: 220px;
+    font-weight: 800;
+  }
+
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* Pantalla final */
+  .final-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .final-screen.active { display: block; }
+
+  .final-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .final-screen h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--verde-neon);
+    margin-bottom: 12px;
+  }
+
+  .final-screen p {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto 32px;
+  }
+
+  .final-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(77,255,145,0.1);
+    border: 1px solid rgba(77,255,145,0.3);
+    border-radius: 99px;
+    font-size: 13px;
+    color: var(--verde-neon);
+    font-weight: 500;
+  }
+
+  /* Intro screen */
+  .intro-screen { padding: 20px 0; }
+
+  .intro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(77,255,145,0.1);
+    border: 1px solid rgba(77,255,145,0.25);
+    border-radius: 99px;
+    font-size: 12px;
+    color: var(--verde-neon);
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .intro-screen h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    color: var(--texto);
+  }
+
+  .intro-screen h2 span { color: var(--verde-neon); }
+
+  .intro-screen p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 520px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--verde-neon);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .btn-start {
+    padding: 16px 40px;
+    background: linear-gradient(135deg, var(--verde), var(--verde-claro));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-start:hover { opacity: 0.9; transform: translateY(-2px); }
+
+  @media (max-width: 500px) {
+    .intro-screen h2 { font-size: 26px; }
+    .pregunta-texto { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">🌿</div>
+    <div class="header-text">
+      <h1>Ingeniería Ambiental · UNICAH</h1>
+      <p>Diagnóstico Académico y Experiencias de Campo</p>
+    </div>
+  </div>
+
+  <!-- Barra de progreso -->
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="progress-info">
+      <span class="area-label" id="areaLabel">Área 1</span>
+      <span class="progress-count" id="progressCount">Pregunta 1 de 19</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <!-- PANTALLA INTRO -->
+  <div id="intro" class="intro-screen active">
+    <div class="intro-badge">🎓 Portal Web · Portales Web I</div>
+    <h2>¿Qué tan bien conoce el país lo que hacés en tu <span>carrera</span>?</h2>
+    <p>Respondé este diagnóstico rápido sobre tus experiencias reales en la carrera: las giras, las clases más pesadas y los proyectos de campo. Tus respuestas van a definir qué mostramos en el nuevo portal web oficial de Ingeniería Ambiental.</p>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num">19</div><div class="stat-label">Preguntas</div></div>
+      <div class="stat"><div class="stat-num">~3</div><div class="stat-label">Minutos</div></div>
+      <div class="stat"><div class="stat-num">9</div><div class="stat-label">Áreas temáticas</div></div>
+    </div>
+    <button class="btn-start" onclick="startSurvey()">Comenzar encuesta →</button>
+  </div>
+
+  <!-- PÁGINAS DE PREGUNTAS -->
+  <div id="survey" style="display:none">
+
+    <!-- PÁGINA 1 -->
+    <div class="page" id="page-1">
+      <div class="area-header">
+        <div class="area-icon">💧</div>
+        <div>
+          <div class="area-title">Área 1: Recursos Vitales</div>
+          <div class="area-sub">Gestión de Agua, Aire y Suelo</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 01</div>
+        <div class="pregunta-texto">En las clases de Gestión de Agua, Aire y Suelo, ¿cuáles han sido los destinos exactos de sus giras de monitoreo o muestreo?</div>
+        <div class="opciones" data-q="1">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Plantas de tratamiento locales (ej: Los Filtros, El Picacho, plantas de tratamiento de industrias).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Muestreos directos en ríos, quebradas o lagunas del país.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Estaciones meteorológicas, zonas de alto tráfico urbano o vertederos de basura.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">No hemos realizado salidas de campo; los datos se analizan en laboratorio o folletos.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 02</div>
+        <div class="pregunta-texto">¿Qué tipo de proyectos prácticos les ha tocado desarrollar para evaluar la contaminación de estos recursos en Honduras?</div>
+        <div class="opciones" data-q="2">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Análisis físico-químico y microbiológico de muestras reales de agua de comunidades.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Mapas de ruido urbano o monitoreo de partículas en el aire en puntos críticos.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Ensayos de laboratorio para medir degradación, erosión o metales pesados en suelos.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Ensayos puramente teóricos o investigaciones basadas en datos de internet.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 2 -->
+    <div class="page" id="page-2">
+      <div class="area-header">
+        <div class="area-icon">🌲</div>
+        <div>
+          <div class="area-title">Área 2: Ecosistemas y Biodiversidad</div>
+          <div class="area-sub">Ecología, Botánica, Zoología y Recursos Naturales</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 03</div>
+        <div class="pregunta-texto">En las materias biológicas y ecológicas, ¿a qué reservas, parques nacionales o centros de conservación han asistido?</div>
+        <div class="opciones" data-q="3">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Parques Nacionales (ej: La Tigra, Cerro Azul Meámbar, Celaque).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Jardines botánicos o centros de investigación agrícola (ej: Lancetilla, El Zamorano).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Refugios de vida silvestre, manglares o zonas costeras (zona sur o atlántica).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Las prácticas se han realizado en las áreas verdes del campus o laboratorios internos.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 04</div>
+        <div class="pregunta-texto">¿Cuál es el enfoque principal de los proyectos de campo en asignaturas de biodiversidad?</div>
+        <div class="opciones" data-q="4">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Inventarios de flora y fauna y medición de índices de biodiversidad en el sitio.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Reforestaciones institucionales o comunitarias y restauración de suelos degradados.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Diagnósticos del estado de conservación y amenazas humanas hacia un área protegida.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Elaboración de herbarios o colecciones zoológicas dentro del laboratorio.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 3 -->
+    <div class="page" id="page-3">
+      <div class="area-header">
+        <div class="area-icon">⚙️</div>
+        <div>
+          <div class="area-title">Área 3: Alta Ingeniería y Saneamiento</div>
+          <div class="area-sub">Hidráulica, Ingeniería Sanitaria I y II, Energía y Ambiente</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 05</div>
+        <div class="pregunta-texto">En las clases de Ingeniería Sanitaria e Hidráulica, ¿adónde han ido a observar diseño de obras de infraestructura ambiental?</div>
+        <div class="opciones" data-q="5">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Represas, sistemas de bombeo o redes de distribución de agua potable (ej: La Concepción, Los Laureles).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Plantas de tratamiento de aguas residuales industriales o municipales.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Sistemas de alcantarillado sanitario y pluvial en proyectos habitacionales reales.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">El aprendizaje ha sido completamente en la pizarra y computadoras.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 06</div>
+        <div class="pregunta-texto">Para la clase de Energía y Ambiente o Producción Limpia, ¿qué tipo de tecnologías o empresas sostenibles han auditado en persona?</div>
+        <div class="opciones" data-q="6">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Parques de energía renovable (solar, eólica, hidroeléctrica o plantas de biomasa).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Industrias certificadas o maquilas con tecnologías eficientes en calderas y procesos.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Micro-proyectos comunitarios de energía limpia (biodigestores, paneles solares locales).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">No se han realizado visitas; el estudio se enfoca en normativas y casos teóricos.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 4 -->
+    <div class="page" id="page-4">
+      <div class="area-header">
+        <div class="area-icon">🗺️</div>
+        <div>
+          <div class="area-title">Área 4: Herramientas Tecnológicas</div>
+          <div class="area-sub">Dibujo, Topografía y Sistemas de Información Geográfica (SIG)</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 07</div>
+        <div class="pregunta-texto">En las asignaturas de Topografía y SIG, ¿qué tipo de trabajos en el terreno o proyectos digitales realizan?</div>
+        <div class="opciones" data-q="7">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Levantamientos topográficos con teodolito/estación total dentro o fuera del campus.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Mapeo digital y georreferenciación de problemas ambientales reales en municipios usando ArcGIS o QGIS.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Análisis satelital de la deforestación o cambios de uso de suelo en cuencas hidrográficas.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Ejercicios guiados básicos con datos de ejemplo en los laboratorios de computación.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 5 -->
+    <div class="page" id="page-5">
+      <div class="area-header">
+        <div class="area-icon">⚖️</div>
+        <div>
+          <div class="area-title">Área 5: Gestión, Leyes e Impacto Municipal</div>
+          <div class="area-sub">EIA, Legislación y Gestión Municipal</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 08</div>
+        <div class="pregunta-texto">Al cursar Evaluación de Impacto Ambiental (EIA), ¿cómo simulan el trabajo de un consultor ambiental real?</div>
+        <div class="opciones" data-q="8">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Elaborando un Estudio de Impacto Ambiental completo para un proyecto real asignado.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Realizando visitas de campo a proyectos en construcción para auditar las medidas de mitigación.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Tramitando y llenando de forma simulada los formularios técnicos que exige la SERNA.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">El enfoque es mayormente teórico, analizando la ley general del ambiente y sus reglamentos.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 09</div>
+        <div class="pregunta-texto">En la clase de Gestión Ambiental Municipal, ¿tienen algún acercamiento con las Unidades Ambientales (UMAs) de las alcaldías?</div>
+        <div class="opciones" data-q="9">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Sí, se realizan diagnósticos técnicos para apoyar la gestión de residuos o cuencas de una municipalidad real.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Sí, mediante entrevistas sobre cómo aplican los planes de arbitrios ambientales en sus comunidades.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">No, la clase se enfoca en estudiar teóricamente la Ley de Municipalidades y sus estructuras.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 6 -->
+    <div class="page" id="page-6">
+      <div class="area-header">
+        <div class="area-icon">📢</div>
+        <div>
+          <div class="area-title">Área 6: Identidad y Proyección</div>
+          <div class="area-sub">Práctica Profesional y percepción general de la carrera</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 10</div>
+        <div class="pregunta-texto">Pensando en tu egreso, ¿en qué logros sentís que la carrera debería gritarle al país "¡Esto es lo que hacemos en la UNICAH!"?</div>
+        <div class="opciones" data-q="10">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">En las investigaciones científicas y análisis de laboratorio que generamos.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">En el impacto social de nuestras giras de vinculación y apoyo técnico a comunidades vulnerables.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">En la capacidad técnica para diseñar plantas de tratamiento y gestionar la industria sostenible.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">En los puestos de liderazgo que ya ocupan nuestros egresados en ministerios, ONGs y empresas.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 7 -->
+    <div class="page" id="page-7">
+      <div class="area-header">
+        <div class="area-icon">🏋️</div>
+        <div>
+          <div class="area-title">Área 7: Las Clases "Filtro"</div>
+          <div class="area-sub">Carga académica y experiencias de laboratorio</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 11</div>
+        <div class="pregunta-texto">Seamos sinceros: ¿Cuál de estas asignaturas te ha sacado (o sentís que te sacará) más canas verdes?</div>
+        <div class="opciones" data-q="11">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Las ingenierías de diseño: Ingeniería Sanitaria I o II.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">El bloque de números puro: Cálculo II o Ecuaciones Diferenciales.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Las químicas avanzadas: Química Analítica Aplicada o Bioquímica.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">La parte técnica digital: Sistemas de Información Geográfica (SIG).</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 12</div>
+        <div class="pregunta-texto">Cuando cursás las clases que llevan laboratorio (como Microbiología o Química Orgánica), ¿qué es lo que más tiempo te consume?</div>
+        <div class="opciones" data-q="12">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Redactar los informes de laboratorio con las bitácoras y normas exigidas.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Estudiar para los exámenes prácticos y memorizar los procedimientos.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">El tiempo que pasamos haciendo los experimentos dentro de la universidad.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Conseguir los materiales o reactivos específicos que pide la práctica.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 8 -->
+    <div class="page" id="page-8">
+      <div class="area-header">
+        <div class="area-icon">📍</div>
+        <div>
+          <div class="area-title">Área 8: Detalle de Giras Específicas</div>
+          <div class="area-sub">Nombres reales de lugares visitados en Honduras</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 13</div>
+        <div class="pregunta-texto">En las clases de Gestión y Calidad del Agua, ¿tuvieron la oportunidad de visitar alguna de estas instalaciones?</div>
+        <div class="opciones" data-q="13">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Una planta potabilizadora municipal (ej. Planta El Picacho o Los Filtros).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Una planta de tratamiento de aguas residuales de una industria o maquila.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Una represa principal del país (ej. La Concepción o Los Laureles).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Ninguna de las anteriores, el enfoque fue en el laboratorio del campus.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 14</div>
+        <div class="pregunta-texto">Para la clase de Gestión y Calidad del Suelo o Remediación Ambiental, ¿qué tipo de escenarios reales han evaluado?</div>
+        <div class="opciones" data-q="14">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Zonas agrícolas para medir el impacto de pesticidas y erosión.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Botaderos de basura o vertederos para ver la contaminación por lixiviados.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Zonas afectadas por deslizamientos, minería o deforestación severa.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Prácticas básicas de laboratorio con muestras traídas por nosotros mismos.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 15</div>
+        <div class="pregunta-texto">Para las clases de Botánica o Zoología, ¿cuál ha sido el viaje técnico más indispensable?</div>
+        <div class="opciones" data-q="15">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Ir a recolectar muestras y acampar en un Parque Nacional (La Tigra, Azul Meámbar, etc.).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Visitar un jardín botánico o centro de investigación (como Lancetilla).</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Giras hacia las costas o manglares para estudiar fauna y flora marina.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Prácticas dentro del campus universitario o análisis de muestras secas.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 9 -->
+    <div class="page" id="page-9">
+      <div class="area-header">
+        <div class="area-icon">🎯</div>
+        <div>
+          <div class="area-title">Área 9: Expectativa vs. Realidad</div>
+          <div class="area-sub">Percepción pública y herramientas para el portal web</div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 16</div>
+        <div class="pregunta-texto">Cuando le decís a alguien que estudiás "Ingeniería Ambiental", ¿cuál reacción te da más cólera?</div>
+        <div class="opciones" data-q="16">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">"Ah qué bonito, vas a pasar sembrando árboles e interactuando con animalitos."</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">"¿Y de eso hay trabajo aquí? ¿Tienen campo laboral?"</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Que piensen que es carrera "suave" sin ingeniería ni matemáticas.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Que la confundan con Agronomía o Biología pura.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 17</div>
+        <div class="pregunta-texto">¿En qué año sentís que se empieza a ver la "verdadera" ingeniería ambiental aplicada?</div>
+        <div class="opciones" data-q="17">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">1er año: Con las bases de Biología, Química y Matemáticas.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">2do año: Cuando entran Microbiología, las Químicas analíticas y Ecología.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">3er año: Con las materias de Fluidos, Hidráulica, Clima y Suelos.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">4to año: Con los diseños de Plantas Sanitarias, Impacto Ambiental y Riesgos.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 18</div>
+        <div class="pregunta-texto">¿Qué formato preferís para consumir la información de los proyectos de la carrera en la web?</div>
+        <div class="opciones" data-q="18">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Videos cortos (estilo Reels/TikTok) grabados por estudiantes en el campo.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Reportes infográficos visuales con datos rápidos y gráficos limpios.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Artículos de blog detallados con el paso a paso científico.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Un mapa interactivo donde das clic al lugar y ves fotos rápidas.</div></div>
+        </div>
+      </div>
+      <div class="pregunta">
+        <div class="pregunta-num">Pregunta 19</div>
+        <div class="pregunta-texto">Para la clase de Legislación Ambiental o EIA, ¿qué recurso digital te ahorraría más horas de frustración?</div>
+        <div class="opciones" data-q="19">
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">A</div><div class="opcion-texto">Un buscador rápido con las leyes ambientales de Honduras ordenadas por categorías.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">B</div><div class="opcion-texto">Ejemplos reales en PDF de Estudios de Impacto Ambiental aprobados por MiAmbiente/SERNA.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">C</div><div class="opcion-texto">Una guía interactiva que explique los pasos exactos para tramitar una licencia ambiental.</div></div>
+          <div class="opcion" onclick="select(this)"><div class="opcion-letra">D</div><div class="opcion-texto">Formatos descargables listos para llenar los formularios técnicos de la carrera.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="nav-btns" id="navBtns">
+      <button class="btn btn-back" id="btnBack" onclick="goBack()" style="display:none">← Atrás</button>
+      <button class="btn btn-next" id="btnNext" onclick="goNext()">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA FINAL -->
+  <div class="final-screen" id="finalScreen">
+    <span class="final-icon">🌿</span>
+    <h2>¡Muchas gracias!</h2>
+    <p>Tus respuestas van a definir qué herramientas y secciones se programan en el nuevo portal web de Ingeniería Ambiental de la UNICAH. ¡Estás siendo parte del cambio!</p>
+    <div class="final-badge">✅ Respuestas registradas correctamente</div>
+  </div>
+
+</div>
+
+<script>
+  const TOTAL_PAGES = 9;
+  let currentPage = 1;
+  const answers = {};
+
+  const areaNames = {
+    1: 'Área 1 · Recursos Vitales',
+    2: 'Área 2 · Ecosistemas',
+    3: 'Área 3 · Ingeniería',
+    4: 'Área 4 · Tecnología',
+    5: 'Área 5 · Gestión y Leyes',
+    6: 'Área 6 · Identidad',
+    7: 'Área 7 · Clases Filtro',
+    8: 'Área 8 · Giras Específicas',
+    9: 'Área 9 · Expectativas'
+  };
+
+  const questionsPerPage = {
+    1:[1,2], 2:[3,4], 3:[5,6], 4:[7], 5:[8,9], 6:[10], 7:[11,12], 8:[13,14,15], 9:[16,17,18,19]
+  };
+
+  function startSurvey() {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('survey').style.display = 'block';
+    document.getElementById('progressWrap').style.display = 'block';
+    showPage(1);
+  }
+
+  function showPage(n) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + n).classList.add('active');
+
+    // Progress
+    const qs = questionsPerPage[n];
+    const firstQ = qs[0];
+    const lastQ = qs[qs.length - 1];
+    document.getElementById('areaLabel').textContent = areaNames[n];
+    document.getElementById('progressCount').textContent = 'Preguntas ' + firstQ + (firstQ !== lastQ ? '–' + lastQ : '') + ' de 19';
+    document.getElementById('progressFill').style.width = (n / TOTAL_PAGES * 100) + '%';
+
+    // Back button
+    document.getElementById('btnBack').style.display = n > 1 ? 'block' : 'none';
+
+    // Next vs submit
+    const btnNext = document.getElementById('btnNext');
+    if (n === TOTAL_PAGES) {
+      btnNext.textContent = 'Enviar respuestas ✓';
+      btnNext.className = 'btn btn-submit';
+      btnNext.onclick = submitSurvey;
+    } else {
+      btnNext.textContent = 'Siguiente →';
+      btnNext.className = 'btn btn-next';
+      btnNext.onclick = goNext;
+    }
+  }
+
+  function select(el) {
+    const group = el.closest('.opciones');
+    group.querySelectorAll('.opcion').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    const qNum = group.dataset.q;
+    const letra = el.querySelector('.opcion-letra').textContent;
+    answers[qNum] = letra;
+  }
+
+  function goNext() {
+    if (currentPage < TOTAL_PAGES) {
+      currentPage++;
+      showPage(currentPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  function goBack() {
+    if (currentPage > 1) {
+      currentPage--;
+      showPage(currentPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  function submitSurvey() {
+    document.getElementById('survey').style.display = 'none';
+    document.getElementById('progressWrap').style.display = 'none';
+    document.getElementById('finalScreen').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
